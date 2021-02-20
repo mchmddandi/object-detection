@@ -10,11 +10,17 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Base64
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.objectdetection.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,23 +32,27 @@ class MainActivity : AppCompatActivity() {
     private var readStoragePermissionAllowed = false
     private var writeReadStoragePermissionAllowed = false
     private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            cameraPermissionAllowed = permissions[Manifest.permission.CAMERA] ?: false
-            readStoragePermissionAllowed =
-                permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
-            writeReadStoragePermissionAllowed =
-                permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: false
-            if (cameraPermissionAllowed && readStoragePermissionAllowed && writeReadStoragePermissionAllowed) {
-                launchNativeCamera()
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                cameraPermissionAllowed = permissions[Manifest.permission.CAMERA] ?: false
+                readStoragePermissionAllowed =
+                        permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
+                writeReadStoragePermissionAllowed =
+                        permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: false
+                if (cameraPermissionAllowed && readStoragePermissionAllowed && writeReadStoragePermissionAllowed) {
+                    launchNativeCamera()
+                }
             }
-        }
 
     private val resultLauncher =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { result ->
-            if (result) {
-                onAnalyzeImage(outputUri)
+            registerForActivityResult(ActivityResultContracts.TakePicture()) { result ->
+                if (result) {
+                    onAnalyzeImage(outputUri)
+                }
             }
-        }
+
+    private val retrofit by lazy {
+        Retrofit.getInstance().create(ApiService::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,26 +73,38 @@ class MainActivity : AppCompatActivity() {
         if (uri == null) return
         val bitmap = getBitmap(uri)
         val scaledImage = getCapturedImage(bitmap)
-//        Log.d("OUTPUT", inputFeature0.toString())
+        val encodedBitmap = encodeBitmap(scaledImage)
+        val params = DetectionRequest(encodedImage = encodedBitmap)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = retrofit.detectObject(params)
+            Log.d("BITMAP",response.toString())
+        }
         binding.imgCapture.setImageBitmap(scaledImage)
+    }
+
+    private fun encodeBitmap(bitmap: Bitmap): String {
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val byteArray = baos.toByteArray()
+        return Base64.encodeToString(byteArray, Base64.DEFAULT)
     }
 
     private fun getCapturedImage(bitmap: Bitmap): Bitmap {
         // Crop image to match imageView's aspect ratio
         val scaleFactor = Math.min(
-            bitmap.width / binding.imgCapture.width.toFloat(),
-            bitmap.height / binding.imgCapture.height.toFloat()
+                bitmap.width / binding.imgCapture.width.toFloat(),
+                bitmap.height / binding.imgCapture.height.toFloat()
         )
 //
         val deltaWidth = (bitmap.width - binding.imgCapture.width * scaleFactor).toInt()
         val deltaHeight = (bitmap.height - binding.imgCapture.width * scaleFactor).toInt()
 
         val scaledImage = Bitmap.createBitmap(
-            bitmap,
-            deltaWidth / 2,
-            deltaHeight / 2,
-            bitmap.width - deltaWidth,
-            bitmap.height - deltaHeight
+                bitmap,
+                deltaWidth / 2,
+                deltaHeight / 2,
+                bitmap.width - deltaWidth,
+                bitmap.height - deltaHeight
         )
         bitmap.recycle()
         return scaledImage
@@ -105,15 +127,15 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = createContentValuesImage()
             contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-                .let {
-                    outputUri = it
-                }
+                    .let {
+                        outputUri = it
+                    }
         } else {
             val tempFile = createTempFileImage()
             outputUri = FileProvider.getUriForFile(
-                this,
-                BuildConfig.APPLICATION_ID.plus(".provider"),
-                tempFile
+                    this,
+                    BuildConfig.APPLICATION_ID.plus(".provider"),
+                    tempFile
             )
         }
     }
@@ -122,11 +144,11 @@ class MainActivity : AppCompatActivity() {
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
         val imageFileName = timeStamp.toString() + "_"
         val fileDirectory =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
-            imageFileName,
-            ".jpg",
-            fileDirectory
+                imageFileName,
+                ".jpg",
+                fileDirectory
         )
     }
 
@@ -141,24 +163,24 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkHasPermission(): Boolean {
         return (ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.CAMERA
+                this,
+                Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED)
                 || (ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED)
                 || ActivityCompat.checkSelfPermission(
-            this,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
     }
 
     companion object {
         val REQUESTED_PERMISSION = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
     }
 }

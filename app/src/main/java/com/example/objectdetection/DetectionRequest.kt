@@ -1,0 +1,7 @@
+package com.example.objectdetection
+
+import com.google.gson.annotations.SerializedName
+
+data class DetectionRequest(
+    @SerializedName("encoded_image") val encodedImage: String
+)
