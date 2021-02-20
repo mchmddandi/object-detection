@@ -3,10 +3,7 @@ package com.example.objectdetection
 import android.Manifest
 import android.content.ContentValues
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.ImageDecoder
-import android.graphics.Paint
+import android.graphics.*
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.objectdetection.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +51,8 @@ class MainActivity : AppCompatActivity() {
             }
 
     private lateinit var canvas: Canvas
-    private val paint = Paint()
+    private val boxPaint = Paint()
+    private val textPaint = Paint()
     private var color: Int? = null
 
     private val retrofit by lazy {
@@ -73,9 +70,14 @@ class MainActivity : AppCompatActivity() {
         binding.btnCapture.setOnClickListener {
             launchNativeCamera()
         }
-        color = ResourcesCompat.getColor(resources, R.color.purple_200, theme)
+        color = Color.GREEN
         color?.let {
-            paint.color = it
+            boxPaint.color = it
+            boxPaint.style = Paint.Style.STROKE; // stroke or fill or ...
+            boxPaint.strokeWidth = 5.toFloat()
+            textPaint.color = it
+            textPaint.style = Paint.Style.FILL
+            textPaint.textSize = 81.toFloat()
         }
     }
 
@@ -83,25 +85,38 @@ class MainActivity : AppCompatActivity() {
     private fun onAnalyzeImage(uri: Uri?) {
         if (uri == null) return
         val bitmap = getBitmap(uri)
-        val scaledImage = getCapturedImage(bitmap)
+        val scaledImage = bitmap.copy(Bitmap.Config.ARGB_8888, true)
         Log.d("BITMAP", "${scaledImage.width} : ${scaledImage.height}")
         val encodedBitmap = encodeBitmap(scaledImage)
         val params = DetectionRequest(encodedImage = encodedBitmap)
         lifecycleScope.launch(Dispatchers.IO) {
             val response = retrofit.detectObject(params)
-            canvas = Canvas(scaledImage)
-            response.detectedObject.forEach {
-                canvas.drawRect(
-                        it.foodBoundingbox.foodX.toFloat(),
-                        it.foodBoundingbox.foodY.toFloat(),
-                        (it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth).toFloat(),
-                        (it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight).toFloat(),
-                        paint)
+
+            launch(Dispatchers.Main) {
+//                val mutableBitmap = scaledImage.copy(Bitmap.Config.ARGB_8888, true)
+                binding.imgCapture.setImageBitmap(scaledImage)
+                canvas = Canvas(scaledImage)
+//                response.detectedObject.forEach {
+//                    canvas.drawRect(
+//                            it.foodBoundingbox.foodX.toFloat(),
+//                            it.foodBoundingbox.foodY.toFloat(),
+//                            (it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth).toFloat(),
+//                            (it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight).toFloat(),
+//                            paint)
+//                }
+                response.detectedObject.forEach {
+                    canvas.drawRect(
+                            Rect(it.foodBoundingbox.foodX, it.foodBoundingbox.foodY, it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth, it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight),
+                            boxPaint)
+                    canvas.drawText(it.foodLabel,it.foodBoundingbox.foodX.toFloat(),it.foodBoundingbox.foodY.toFloat(),textPaint)
+                }
+//                canvas.drawRect(Rect(10, 10, 100, 100), paint)
+                binding.root.invalidate()
             }
+
+//            binding.root.invalidate()
             Log.d("BITMAP", response.toString())
         }
-        binding.imgCapture.setImageBitmap(scaledImage)
-        binding.imgCapture.invalidate()
     }
 
     private fun encodeBitmap(bitmap: Bitmap): String {
