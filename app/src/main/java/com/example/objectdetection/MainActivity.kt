@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.ImageDecoder
+import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,10 +14,12 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.objectdetection.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
@@ -38,8 +42,8 @@ class MainActivity : AppCompatActivity() {
                         permissions[Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
                 writeReadStoragePermissionAllowed =
                         permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: false
-                if (cameraPermissionAllowed && readStoragePermissionAllowed && writeReadStoragePermissionAllowed) {
-                    launchNativeCamera()
+                if (!cameraPermissionAllowed && !readStoragePermissionAllowed && !writeReadStoragePermissionAllowed) {
+                    Toast.makeText(this, "Need the permission to use the feature", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -49,6 +53,10 @@ class MainActivity : AppCompatActivity() {
                     onAnalyzeImage(outputUri)
                 }
             }
+
+    private lateinit var canvas: Canvas
+    private val paint = Paint()
+    private var color: Int? = null
 
     private val retrofit by lazy {
         Retrofit.getInstance().create(ApiService::class.java)
@@ -65,7 +73,10 @@ class MainActivity : AppCompatActivity() {
         binding.btnCapture.setOnClickListener {
             launchNativeCamera()
         }
-
+        color = ResourcesCompat.getColor(resources, R.color.purple_200, theme)
+        color?.let {
+            paint.color = it
+        }
     }
 
 
@@ -73,13 +84,24 @@ class MainActivity : AppCompatActivity() {
         if (uri == null) return
         val bitmap = getBitmap(uri)
         val scaledImage = getCapturedImage(bitmap)
+        Log.d("BITMAP", "${scaledImage.width} : ${scaledImage.height}")
         val encodedBitmap = encodeBitmap(scaledImage)
         val params = DetectionRequest(encodedImage = encodedBitmap)
         lifecycleScope.launch(Dispatchers.IO) {
             val response = retrofit.detectObject(params)
-            Log.d("BITMAP",response.toString())
+            canvas = Canvas(scaledImage)
+            response.detectedObject.forEach {
+                canvas.drawRect(
+                        it.foodBoundingbox.foodX.toFloat(),
+                        it.foodBoundingbox.foodY.toFloat(),
+                        (it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth).toFloat(),
+                        (it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight).toFloat(),
+                        paint)
+            }
+            Log.d("BITMAP", response.toString())
         }
         binding.imgCapture.setImageBitmap(scaledImage)
+        binding.imgCapture.invalidate()
     }
 
     private fun encodeBitmap(bitmap: Bitmap): String {
@@ -97,7 +119,7 @@ class MainActivity : AppCompatActivity() {
         )
 //
         val deltaWidth = (bitmap.width - binding.imgCapture.width * scaleFactor).toInt()
-        val deltaHeight = (bitmap.height - binding.imgCapture.width * scaleFactor).toInt()
+        val deltaHeight = (bitmap.height - binding.imgCapture.height * scaleFactor).toInt()
 
         val scaledImage = Bitmap.createBitmap(
                 bitmap,
