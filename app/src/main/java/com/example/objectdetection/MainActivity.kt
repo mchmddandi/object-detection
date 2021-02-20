@@ -93,28 +93,16 @@ class MainActivity : AppCompatActivity() {
             val response = retrofit.detectObject(params)
 
             launch(Dispatchers.Main) {
-//                val mutableBitmap = scaledImage.copy(Bitmap.Config.ARGB_8888, true)
                 binding.imgCapture.setImageBitmap(scaledImage)
                 canvas = Canvas(scaledImage)
-//                response.detectedObject.forEach {
-//                    canvas.drawRect(
-//                            it.foodBoundingbox.foodX.toFloat(),
-//                            it.foodBoundingbox.foodY.toFloat(),
-//                            (it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth).toFloat(),
-//                            (it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight).toFloat(),
-//                            paint)
-//                }
                 response.detectedObject.forEach {
                     canvas.drawRect(
                             Rect(it.foodBoundingbox.foodX, it.foodBoundingbox.foodY, it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth, it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight),
                             boxPaint)
                     canvas.drawText(it.foodLabel,it.foodBoundingbox.foodX.toFloat(),it.foodBoundingbox.foodY.toFloat(),textPaint)
                 }
-//                canvas.drawRect(Rect(10, 10, 100, 100), paint)
                 binding.root.invalidate()
             }
-
-//            binding.root.invalidate()
             Log.d("BITMAP", response.toString())
         }
     }
