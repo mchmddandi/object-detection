@@ -11,6 +11,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -89,10 +90,12 @@ class MainActivity : AppCompatActivity() {
         Log.d("BITMAP", "${scaledImage.width} : ${scaledImage.height}")
         val encodedBitmap = encodeBitmap(scaledImage)
         val params = DetectionRequest(encodedImage = encodedBitmap)
+        binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch(Dispatchers.IO) {
             val response = retrofit.detectObject(params)
 
             launch(Dispatchers.Main) {
+                binding.progressBar.visibility = View.GONE
                 binding.imgCapture.setImageBitmap(scaledImage)
                 canvas = Canvas(scaledImage)
                 response.detectedObject.forEach {
