@@ -4,18 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".NutritionFragment">
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/navHostFragment"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <TextView
+        android:id="@+id/tvDetectedObjectLabelNutrition"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="Nasi"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvNutritions"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:defaultNavHost="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/main_navigation" />
+        app:layout_constraintTop_toBottomOf="@id/tvDetectedObjectLabelNutrition" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
