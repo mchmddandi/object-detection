@@ -51,6 +51,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+    private val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        onAnalyzeImage(it)
+    }
+
     private lateinit var canvas: Canvas
     private val boxPaint = Paint()
     private val textPaint = Paint()
@@ -60,16 +64,19 @@ class MainActivity : AppCompatActivity() {
         Retrofit.getInstance().create(ApiService::class.java)
     }
 
+    private var pickImageOptionBottomSheet: PickImageOptionBottomSheet? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+        setupBottomSheet()
         if (!checkHasPermission()) {
             requestPermissionLauncher.launch(REQUESTED_PERMISSION)
         }
-        binding.btnCapture.setOnClickListener {
-            launchNativeCamera()
+        binding.btnAdd.setOnClickListener {
+            pickImageOptionBottomSheet?.show(supportFragmentManager, PickImageOptionBottomSheet.TAG)
         }
         color = Color.GREEN
         color?.let {
@@ -80,6 +87,10 @@ class MainActivity : AppCompatActivity() {
             textPaint.style = Paint.Style.FILL
             textPaint.textSize = 81.toFloat()
         }
+    }
+
+    private fun pickFromGallery() {
+        getContent.launch("image/*")
     }
 
 
@@ -95,14 +106,16 @@ class MainActivity : AppCompatActivity() {
             val response = retrofit.detectObject(params)
 
             launch(Dispatchers.Main) {
+                Log.d("RESULT", "${response.detectedObject}")
                 binding.progressBar.visibility = View.GONE
                 binding.imgCapture.setImageBitmap(scaledImage)
                 canvas = Canvas(scaledImage)
                 response.detectedObject.forEach {
+                    binding.tvDetectedObjectLabel.text = it.foodLabel
                     canvas.drawRect(
                             Rect(it.foodBoundingbox.foodX, it.foodBoundingbox.foodY, it.foodBoundingbox.foodX + it.foodBoundingbox.foodWidth, it.foodBoundingbox.foodY + it.foodBoundingbox.foodHeight),
                             boxPaint)
-                    canvas.drawText(it.foodLabel,it.foodBoundingbox.foodX.toFloat(),it.foodBoundingbox.foodY.toFloat(),textPaint)
+                    canvas.drawText(it.foodLabel, it.foodBoundingbox.foodX.toFloat(), it.foodBoundingbox.foodY.toFloat(), textPaint)
                 }
                 binding.root.invalidate()
             }
@@ -210,6 +223,26 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
+    }
+
+    private fun setupBottomSheet() {
+        val pickImageOptions = listOf(
+                PickImageOptionAdapter.PickImage(
+                        text = "Capture Image",
+                        onClick = {
+                            launchNativeCamera()
+                            pickImageOptionBottomSheet?.dismiss()
+                        }
+                ),
+                PickImageOptionAdapter.PickImage(
+                        text = "Pick from gallery",
+                        onClick = {
+                            pickFromGallery()
+                            pickImageOptionBottomSheet?.dismiss()
+                        }
+                )
+        )
+        pickImageOptionBottomSheet = PickImageOptionBottomSheet.newInstance(pickImageOptions)
     }
 }
 
