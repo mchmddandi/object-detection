@@ -51,29 +51,6 @@ class NutritionFragment : Fragment() {
         nutritionAdapter.setItems(data)
     }
 
-    private fun createMockData() = listOf(
-        NutritionAdapter.Nutrition(
-            label = "Karbohidrat",
-            value = "100g"
-        ),
-        NutritionAdapter.Nutrition(
-            label = "Karbohidrat",
-            value = "100g"
-        ),
-        NutritionAdapter.Nutrition(
-            label = "Karbohidrat",
-            value = "100g"
-        ),
-        NutritionAdapter.Nutrition(
-            label = "Karbohidrat",
-            value = "100g"
-        ),
-        NutritionAdapter.Nutrition(
-            label = "Karbohidrat",
-            value = "100g"
-        )
-    )
-
     companion object {
         @JvmStatic
         fun newInstance(param1: String) =
