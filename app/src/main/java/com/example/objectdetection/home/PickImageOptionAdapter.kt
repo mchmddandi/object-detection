@@ -1,9 +1,9 @@
-package com.example.objectdetection
+package com.example.objectdetection.home
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.objectdetection.R
 import com.example.objectdetection.databinding.PickImageItemBinding
 
 class PickImageOptionAdapter :

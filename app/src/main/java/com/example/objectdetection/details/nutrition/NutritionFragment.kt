@@ -1,4 +1,4 @@
-package com.example.objectdetection
+package com.example.objectdetection.details.nutrition
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.objectdetection.R
 import com.example.objectdetection.databinding.FragmentNutritionBinding
 
 // TODO: Rename parameter arguments, choose names that match

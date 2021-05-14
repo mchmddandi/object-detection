@@ -1,8 +1,9 @@
-package com.example.objectdetection
+package com.example.objectdetection.details.nutrition
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.objectdetection.R
 import com.example.objectdetection.databinding.NutritionItemBinding
 
 class NutritionAdapter : RecyclerView.Adapter<NutritionAdapter.NutritionViewHolder>() {
@@ -32,6 +33,8 @@ class NutritionAdapter : RecyclerView.Adapter<NutritionAdapter.NutritionViewHold
         this.items.addAll(items)
         notifyDataSetChanged()
     }
+
+
 
     data class Nutrition(
         val label: String,

@@ -1,4 +1,4 @@
-package com.example.objectdetection
+package com.example.objectdetection.home
 
 import android.content.ContentValues
 import android.net.Uri
@@ -12,8 +12,15 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.objectdetection.*
 import com.example.objectdetection.databinding.FragmentHomeBinding
+import com.example.objectdetection.home.recentactivity.RecentActivityAdapter
+import com.example.objectdetection.home.recentactivity.RecentActivityRepositoryImpl
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,8 +37,17 @@ class HomeFragment : Fragment() {
             }
         }
 
-    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        navigateToDetailsScreen(it)
+    private val pickImageLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) {
+            navigateToDetailsScreen(it)
+        }
+
+    private val recentActivityAdapter by lazy {
+        RecentActivityAdapter()
+    }
+
+    private val repo by lazy {
+        RecentActivityRepositoryImpl(Firestore.getInstance())
     }
 
     private var pickImageOptionBottomSheet: PickImageOptionBottomSheet? = null
@@ -54,6 +70,7 @@ class HomeFragment : Fragment() {
         binding.btnAdd.setOnClickListener {
             pickImageOptionBottomSheet?.show(childFragmentManager, PickImageOptionBottomSheet.TAG)
         }
+        initView()
     }
 
     private fun setupToolbar() {
@@ -69,6 +86,29 @@ class HomeFragment : Fragment() {
     private fun launchNativeCamera() {
         createTempFile()
         takePictureLauncher.launch(outputUri)
+    }
+
+    private fun initView() {
+        binding.rvRecentActivity.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = recentActivityAdapter
+        }
+        initData()
+        recentActivityAdapter.setOnItemClick {
+            val bundle = Bundle()
+            bundle.putParcelable("RECENT_ACTIVITY", it)
+            navController.navigate(R.id.action_homeFragment_to_detailsFragment, bundle)
+        }
+    }
+
+    private fun initData() {
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch(Dispatchers.IO) {
+            repo.getRecentActivities() {
+                binding.progressBar.visibility = View.GONE
+                recentActivityAdapter.setItem(it)
+            }
+        }
     }
 
     private fun createTempFile() {
@@ -132,7 +172,7 @@ class HomeFragment : Fragment() {
         pickImageOptionBottomSheet = PickImageOptionBottomSheet.newInstance(pickImageOptions)
     }
 
-    private fun navigateToDetailsScreen(uri: Uri?){
+    private fun navigateToDetailsScreen(uri: Uri?) {
         val args = Bundle()
         args.putString("IMAGE_URI", uri.toString())
         navController.navigate(R.id.action_homeFragment_to_detailsFragment, args)

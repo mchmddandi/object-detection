@@ -1,10 +1,11 @@
-package com.example.objectdetection
+package com.example.objectdetection.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.objectdetection.R
 import com.example.objectdetection.databinding.PickImageMenuBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 

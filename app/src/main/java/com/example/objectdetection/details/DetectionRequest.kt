@@ -1,4 +1,4 @@
-package com.example.objectdetection
+package com.example.objectdetection.details
 
 import com.google.gson.annotations.SerializedName
 
