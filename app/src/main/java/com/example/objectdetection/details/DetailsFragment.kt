@@ -53,7 +53,7 @@ class DetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        arguments?.get("RECENT_ACTIVITY").let {
+        arguments?.get("RECENT_ACTIVITY")?.let {
             displayData(it as RecentActivity)
         }
         requireArguments().getString("IMAGE_URI")?.run {
