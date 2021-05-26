@@ -6,28 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".details.DetailsFragment">
 
-    <TextView
-        android:id="@+id/tvBack"
-        style="@style/TextAppearance.MaterialComponents.Body1"
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Back"
-        android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="@+id/tvDetectedObjectLabel"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tvDetectedObjectLabel" />
-
-    <TextView
-        android:id="@+id/tvDetectedObjectLabel"
-        style="@style/TextAppearance.MaterialComponents.Headline4"
-        android:layout_width="wrap_content"
-        android:layout_height="?attr/actionBarSize"
-        android:text="Details"
-        android:textColor="@color/black"
+        android:background="@color/hijau_primary"
+        android:textAlignment="center"
+        app:titleTextColor="@color/white"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
+
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -37,7 +26,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDetectedObjectLabel" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <ImageView
         android:id="@+id/imgCapture"
@@ -48,7 +37,7 @@
         app:layout_constraintBottom_toTopOf="@id/vpNutritions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvDetectedObjectLabel" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vpNutritions"
