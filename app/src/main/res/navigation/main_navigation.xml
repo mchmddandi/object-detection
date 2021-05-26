@@ -22,7 +22,7 @@
     <fragment
         android:id="@+id/detailsFragment"
         android:name="com.example.objectdetection.details.DetailsFragment"
-        android:label="fragment_details"
+        android:label="Details"
         app:enterAnim="@anim/slide_in_right"
         app:exitAnim="@anim/slide_out_left"
         app:popEnterAnim="@anim/slide_in_left"

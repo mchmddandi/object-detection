@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:background="@color/hijau_primary"
         android:textAlignment="center"
+        app:title="Details"
         app:titleTextColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
