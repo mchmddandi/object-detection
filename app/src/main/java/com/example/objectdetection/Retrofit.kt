@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object Retrofit {
     fun getInstance(): Retrofit{
         return Retrofit.Builder()
-            .baseUrl("http://172.168.100.125:5000/")
+            .baseUrl("http://192.168.1.6:5000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

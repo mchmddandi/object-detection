@@ -1,33 +1,34 @@
 {
   "project_info": {
-    "project_number": "674218780544",
-    "project_id": "objectdetection-52249",
-    "storage_bucket": "objectdetection-52249.appspot.com"
+    "project_number": "152873793762",
+    "firebase_url": "https://taproject-59c35-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "taproject-59c35",
+    "storage_bucket": "taproject-59c35.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:674218780544:android:9a47b881ace37a1c520365",
+        "mobilesdk_app_id": "1:152873793762:android:03d8df82b170856b6506bb",
         "android_client_info": {
           "package_name": "com.example.objectdetection"
         }
       },
       "oauth_client": [
         {
-          "client_id": "674218780544-op30e7f0sph207lo3vijfr998eq4ar23.apps.googleusercontent.com",
+          "client_id": "152873793762-osvv2061v3o63qf9ad5lj8cfltlv0u0s.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA7b8GrTH9ZJJ3j4iTmnIfeTL-bWDcl99M"
+          "current_key": "AIzaSyBFc_aHFPKLQP4XiVFurG8pF-pJ2nJdXUI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "674218780544-op30e7f0sph207lo3vijfr998eq4ar23.apps.googleusercontent.com",
+              "client_id": "152873793762-osvv2061v3o63qf9ad5lj8cfltlv0u0s.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
